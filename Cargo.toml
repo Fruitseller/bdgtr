@@ -1,0 +1,6 @@
+[package]
+name = "bdgtr"
+version = "0.1.0"
+authors = ["Peter Bronkalla <bronkalla@sipgate.de>"]
+
+[dependencies]
