@@ -8,14 +8,32 @@ fn main() {
             println!("I am groot");
         }
         2 => {
-            println!("->  {}", args[1]);
+            if args[1] != "expenses" {
+                println!("Wrong argument");
+            } else {
+                print_expenses();
+            }
+        }
+        4 => {
             if args[1] == "add" {
-                println!("add");
-            } else if args[1] == "expenses" {
-                println!("expenses");
+                let result = args[3].parse::<f64>();
+                let amount = match result {
+                    Ok(amount) => amount,
+                    Err(e) => panic!(e),
+                };
+                let name = args[2].to_string();
+                let expense = Expense {name, amount};
+                println!("{:?}", expense);
             }
         }
         _ => panic!("Too many arguments!"),
     }
-    println!("args {:?}", args);
 }
+
+#[derive(Debug)]
+struct Expense {
+    name: String,
+    amount: f64
+}
+
+fn print_expenses() {}
