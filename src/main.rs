@@ -1,4 +1,6 @@
 use std::env;
+use std::process;
+use std::fs::{File, OpenOptions};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -23,7 +25,8 @@ fn main() {
                 };
                 let name = args[2].to_string();
                 let expense = Expense {name, amount};
-                println!("{:?}", expense);
+                let file = get_file("expenses.json");
+                println!("{:?}", file);
             }
         }
         _ => panic!("Too many arguments!"),
@@ -34,6 +37,16 @@ fn main() {
 struct Expense {
     name: String,
     amount: f64
+}
+
+fn get_file(path: &str) -> File {
+    match OpenOptions::new().append(true).create(true).open(path) {
+        Ok(file) => file,
+        Err(_) => {
+            println!("Could not read file at: {}", path);
+            process::exit(1);
+        }
+    }
 }
 
 fn print_expenses() {}
