@@ -1,6 +1,6 @@
 use std::env;
-use std::process;
 use std::fs::{File, OpenOptions};
+use std::process;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -24,7 +24,7 @@ fn main() {
                     Err(e) => panic!(e),
                 };
                 let name = args[2].to_string();
-                let expense = Expense {name, amount};
+                let expense = Expense { name, amount };
                 let file = get_file("expenses.json");
                 println!("{:?}", file);
             }
@@ -36,7 +36,7 @@ fn main() {
 #[derive(Debug)]
 struct Expense {
     name: String,
-    amount: f64
+    amount: f64,
 }
 
 fn get_file(path: &str) -> File {
