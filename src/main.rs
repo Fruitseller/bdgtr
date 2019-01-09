@@ -1,7 +1,7 @@
 use std::env;
 use std::fmt;
 use std::fs::{File, OpenOptions};
-use std::io::Write;
+use std::io::{Write, BufReader, BufRead};
 use std::process;
 
 fn main() {
@@ -52,7 +52,7 @@ impl fmt::Display for Expense {
 }
 
 fn get_file(path: &str) -> File {
-    match OpenOptions::new().append(true).create(true).open(path) {
+    match OpenOptions::new().append(true).create(true).read(true).open(path) {
         Ok(file) => file,
         Err(_) => {
             println!("Could not read file at: {}", path);
@@ -61,7 +61,17 @@ fn get_file(path: &str) -> File {
     }
 }
 
-fn print_expenses() {}
+fn print_expenses() {
+    let file = get_file("expenses.csv");
+    let reader = BufReader::new(file);
+    let mut expenses: Vec<Expense> = Vec::new();
+    for line in reader.lines() {
+        let actual_line = line.unwrap();
+        let mut splitted = actual_line.split(",");
+
+        println!("{:?}", splitted);
+    }
+}
 
 #[cfg(test)]
 mod tests {
