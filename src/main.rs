@@ -62,3 +62,14 @@ fn get_file(path: &str) -> File {
 }
 
 fn print_expenses() {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn to_string() {
+        let expense = Expense {name: "foo".to_string(), amount: 22.3};
+        assert_eq!("foo,22.3", expense.to_string());
+    }
+}
