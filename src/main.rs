@@ -29,7 +29,6 @@ fn main() {
                 let expense = Expense { name, amount };
                 let mut file = get_file("expenses.csv");
                 writeln!(file, "{}", expense.to_string());
-                println!("{:?}", file);
             }
         }
         _ => panic!("Too many arguments!"),
@@ -74,8 +73,12 @@ fn print_expenses() {
         let actual_line = line.unwrap();
         let mut splitted: Vec<String> = actual_line.split(",").map(|s| s.to_string()).collect();
 
-        println!("{:?}", splitted);
+        let result = splitted[1].clone().parse::<f64>();
+        let expense = Expense{name: splitted[0].clone(), amount: result.unwrap()};
+        expenses.push(expense);
     }
+
+    println!("{:#?}", expenses);
 }
 
 #[cfg(test)]
