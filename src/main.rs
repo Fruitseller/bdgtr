@@ -1,3 +1,4 @@
+use std::cmp;
 use std::env;
 use std::fmt;
 use std::fs::{File, OpenOptions};
@@ -17,6 +18,7 @@ fn main() {
             } else {
                 let file = get_file_for_read("expenses.csv");
                 let expenses = parse_expenses(&file);
+                print_expense_table(&expenses);
             }
         }
         4 => {
@@ -36,7 +38,7 @@ fn main() {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 struct Expense {
     name: String,
     amount: f64,
@@ -52,10 +54,7 @@ impl fmt::Display for Expense {
 }
 
 fn get_file_for_read(path: &str) -> File {
-    match OpenOptions::new()
-        .read(true)
-        .open(path)
-    {
+    match OpenOptions::new().read(true).open(path) {
         Ok(file) => file,
         Err(_) => {
             eprintln!("Could not read file at: {}", path);
@@ -65,17 +64,13 @@ fn get_file_for_read(path: &str) -> File {
 }
 
 fn get_file_for_write(path: &str) -> File {
-    match OpenOptions::new()
-        .append(true)
-        .create(true)
-        .open(path)
-        {
-            Ok(file) => file,
-            Err(_) => {
-                eprintln!("Could not read file at: {}", path);
-                process::exit(1);
-            }
+    match OpenOptions::new().append(true).create(true).open(path) {
+        Ok(file) => file,
+        Err(_) => {
+            eprintln!("Could not read file at: {}", path);
+            process::exit(1);
         }
+    }
 }
 
 fn parse_expenses(file: &File) -> Vec<Expense> {
@@ -101,6 +96,47 @@ fn parse_expenses(file: &File) -> Vec<Expense> {
     }
 
     expenses
+}
+
+fn print_expense_table(expenses: &Vec<Expense>) {
+    let longest_name = find_longest_expense_name(expenses);
+
+    let padded_expenses = pad_expense_names(expenses, longest_name);
+
+    for expense in padded_expenses {
+        println!("| {} | {} |", expense.name, expense.amount);
+    }
+}
+
+fn find_longest_expense_name(expenses: &Vec<Expense>) -> i32 {
+    let mut longest: i32 = 0;
+    for expense in expenses {
+        let actual_length = expense.name.len() as i32;
+        if actual_length > longest {
+
+            longest = actual_length;
+        }
+    }
+    cmp::max(longest, 4)
+}
+
+fn pad_expense_names(expenses: &Vec<Expense>, longest: i32) -> Vec<Expense> {
+    let mut padded_expenses = Vec::new();
+    for expense in expenses {
+        let actual_length = expense.name.len() as i32;
+        if actual_length == longest {
+            padded_expenses.push(expense.clone());
+        } else {
+            let difference = longest - actual_length;
+            let spaces = (0..difference).map(|_| " ").collect::<String>();
+            padded_expenses.push(Expense {
+                name: format!("{}{}", expense.name, spaces).to_string(),
+                amount: expense.amount,
+            });
+        }
+    }
+
+    padded_expenses
 }
 
 #[cfg(test)]
