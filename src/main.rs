@@ -60,7 +60,7 @@ fn get_file(path: &str) -> File {
     {
         Ok(file) => file,
         Err(_) => {
-            println!("Could not read file at: {}", path);
+            eprintln!("FOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOoooole at: {}", path);
             process::exit(1);
         }
     }
@@ -105,8 +105,26 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_expenses() {
-        let file = get_file("src/happy_path.csv");
+    fn parse_expenses_with_happy_path() {
+        let file = get_file("test_files/happy_path.csv");
+        let actual_expenses = parse_expenses(&file);
+        let expected_expenses = vec![
+            Expense {
+                name: "netflix".to_string(),
+                amount: 42f64,
+            },
+            Expense {
+                name: "google".to_string(),
+                amount: 3f64,
+            },
+        ];
+
+        assert_eq!(expected_expenses, actual_expenses);
+    }
+
+    #[test]
+    fn parse_expenses_with_broken_entries() {
+        let file = get_file("test_files/broken_entries.csv");
         let actual_expenses = parse_expenses(&file);
         let expected_expenses = vec![
             Expense {
