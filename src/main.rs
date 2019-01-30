@@ -15,7 +15,8 @@ fn main() {
             if args[1] != "expenses" {
                 println!("Wrong argument");
             } else {
-                print_expenses();
+                let file = get_file("expenses.csv");
+                let expenses = parse_expenses(&file);
             }
         }
         4 => {
@@ -35,7 +36,7 @@ fn main() {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct Expense {
     name: String,
     amount: f64,
@@ -65,14 +66,13 @@ fn get_file(path: &str) -> File {
     }
 }
 
-fn print_expenses() {
-    let file = get_file("expenses.csv");
+fn parse_expenses(file: &File) -> Vec<Expense> {
     let reader = BufReader::new(file);
     let mut expenses: Vec<Expense> = Vec::new();
     for result in reader.lines() {
         let line = match result {
             Ok(l) => l,
-            Err(_) => continue
+            Err(_) => continue,
         };
         let mut split_result: Vec<String> = line.split(",").map(|s| s.to_string()).collect();
 
@@ -80,15 +80,15 @@ fn print_expenses() {
             let parse_result = split_result.remove(1).parse::<f64>();
             let amount = match parse_result {
                 Ok(a) => a,
-                Err(_) => continue
+                Err(_) => continue,
             };
             let name = split_result.remove(0);
-            let expense = Expense{name, amount };
+            let expense = Expense { name, amount };
             expenses.push(expense);
         }
     }
 
-    println!("{:#?}", expenses);
+    expenses
 }
 
 #[cfg(test)]
@@ -102,5 +102,23 @@ mod tests {
             amount: 22.3,
         };
         assert_eq!("foo,22.3", expense.to_string());
+    }
+
+    #[test]
+    fn test_parse_expenses() {
+        let file = get_file("src/happy_path.csv");
+        let actual_expenses = parse_expenses(&file);
+        let expected_expenses = vec![
+            Expense {
+                name: "netflix".to_string(),
+                amount: 42f64,
+            },
+            Expense {
+                name: "google".to_string(),
+                amount: 3f64,
+            },
+        ];
+
+        assert_eq!(expected_expenses, actual_expenses);
     }
 }
