@@ -15,7 +15,7 @@ fn main() {
             if args[1] != "expenses" {
                 println!("Wrong argument");
             } else {
-                let file = get_file("expenses.csv");
+                let file = get_file_for_read("expenses.csv");
                 let expenses = parse_expenses(&file);
             }
         }
@@ -28,7 +28,7 @@ fn main() {
                 };
                 let name = args[2].to_string();
                 let expense = Expense { name, amount };
-                let mut file = get_file("expenses.csv");
+                let mut file = get_file_for_write("expenses.csv");
                 writeln!(file, "{}", expense.to_string());
             }
         }
@@ -51,19 +51,31 @@ impl fmt::Display for Expense {
     }
 }
 
-fn get_file(path: &str) -> File {
+fn get_file_for_read(path: &str) -> File {
     match OpenOptions::new()
-        .append(true)
-        .create(true)
         .read(true)
         .open(path)
     {
         Ok(file) => file,
         Err(_) => {
-            eprintln!("FOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOoooole at: {}", path);
+            eprintln!("Could not read file at: {}", path);
             process::exit(1);
         }
     }
+}
+
+fn get_file_for_write(path: &str) -> File {
+    match OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(path)
+        {
+            Ok(file) => file,
+            Err(_) => {
+                eprintln!("Could not read file at: {}", path);
+                process::exit(1);
+            }
+        }
 }
 
 fn parse_expenses(file: &File) -> Vec<Expense> {
@@ -106,7 +118,7 @@ mod tests {
 
     #[test]
     fn parse_expenses_with_happy_path() {
-        let file = get_file("test_files/happy_path.csv");
+        let file = get_file_for_read("test_files/happy_path.csv");
         let actual_expenses = parse_expenses(&file);
         let expected_expenses = vec![
             Expense {
@@ -124,7 +136,7 @@ mod tests {
 
     #[test]
     fn parse_expenses_with_broken_entries() {
-        let file = get_file("test_files/broken_entries.csv");
+        let file = get_file_for_read("test_files/broken_entries.csv");
         let actual_expenses = parse_expenses(&file);
         let expected_expenses = vec![
             Expense {
