@@ -69,13 +69,23 @@ fn print_expenses() {
     let file = get_file("expenses.csv");
     let reader = BufReader::new(file);
     let mut expenses: Vec<Expense> = Vec::new();
-    for line in reader.lines() {
-        let actual_line = line.unwrap();
-        let mut splitted: Vec<String> = actual_line.split(",").map(|s| s.to_string()).collect();
+    for result in reader.lines() {
+        let line = match result {
+            Ok(l) => l,
+            Err(_) => continue
+        };
+        let mut split_result: Vec<String> = line.split(",").map(|s| s.to_string()).collect();
 
-        let result = splitted[1].clone().parse::<f64>();
-        let expense = Expense{name: splitted[0].clone(), amount: result.unwrap()};
-        expenses.push(expense);
+        if split_result.len() == 2 {
+            let parse_result = split_result.remove(1).parse::<f64>();
+            let amount = match parse_result {
+                Ok(a) => a,
+                Err(_) => continue
+            };
+            let name = split_result.remove(0);
+            let expense = Expense{name, amount };
+            expenses.push(expense);
+        }
     }
 
     println!("{:#?}", expenses);
