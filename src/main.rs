@@ -1,9 +1,31 @@
-use std::cmp;
 use std::env;
 use std::fmt;
 use std::fs::{File, OpenOptions};
 use std::io::{BufRead, BufReader, Write};
 use std::process;
+
+const EXPENSE_NAME_HEADER: &str = "What";
+
+type Result<T> = std::result::Result<T, ExpenseError>;
+
+#[derive(Debug, Clone)]
+struct ExpenseError {
+    message: String,
+}
+
+impl ExpenseError {
+    pub fn new(m: &str) -> ExpenseError {
+        ExpenseError {
+            message: m.to_string(),
+        }
+    }
+}
+
+impl fmt::Display for ExpenseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -101,26 +123,33 @@ fn parse_expenses(file: &File) -> Vec<Expense> {
 fn print_expense_table(expenses: &Vec<Expense>) {
     let longest_name = find_longest_expense_name(expenses);
 
-    let padded_expenses = pad_expense_names(expenses, longest_name);
+    // TODO use ? operator instead of unwrap()
+    let padded_expenses = pad_expense_names(expenses, longest_name).unwrap();
 
+    print_header();
     for expense in padded_expenses {
         println!("| {} | {} |", expense.name, expense.amount);
     }
 }
 
+fn print_header() {
+    println!("+---------+----------+");
+    println!("| What    | How much |");
+    println!("+---------+----------+");
+}
+
 fn find_longest_expense_name(expenses: &Vec<Expense>) -> i32 {
-    let mut longest: i32 = 0;
+    let mut longest: i32 = EXPENSE_NAME_HEADER.len() as i32;
     for expense in expenses {
         let actual_length = expense.name.len() as i32;
         if actual_length > longest {
-
             longest = actual_length;
         }
     }
-    cmp::max(longest, 4)
+    longest
 }
 
-fn pad_expense_names(expenses: &Vec<Expense>, longest: i32) -> Vec<Expense> {
+fn pad_expense_names(expenses: &Vec<Expense>, longest: i32) -> Result<Vec<Expense>> {
     let mut padded_expenses = Vec::new();
     for expense in expenses {
         let actual_length = expense.name.len() as i32;
@@ -128,6 +157,10 @@ fn pad_expense_names(expenses: &Vec<Expense>, longest: i32) -> Vec<Expense> {
             padded_expenses.push(expense.clone());
         } else {
             let difference = longest - actual_length;
+            if difference < 0 {
+                let error: ExpenseError = ExpenseError::new("Padding went wrong!");
+                return Err(error);
+            }
             let spaces = (0..difference).map(|_| " ").collect::<String>();
             padded_expenses.push(Expense {
                 name: format!("{}{}", expense.name, spaces).to_string(),
@@ -136,7 +169,7 @@ fn pad_expense_names(expenses: &Vec<Expense>, longest: i32) -> Vec<Expense> {
         }
     }
 
-    padded_expenses
+    Ok(padded_expenses)
 }
 
 #[cfg(test)]
@@ -186,5 +219,25 @@ mod tests {
         ];
 
         assert_eq!(expected_expenses, actual_expenses);
+    }
+
+    #[test]
+    fn pad_expense_names_happy_path() {
+        let expenses = vec![Expense {
+            name: "foo".to_string(),
+            amount: 0f64,
+        }];
+        let result_expenses = pad_expense_names(&expenses, 4);
+        assert_eq!(true, result_expenses.is_ok());
+    }
+
+    #[test]
+    fn pad_expense_names_broken() {
+        let expenses = vec![Expense {
+            name: "foo".to_string(),
+            amount: 0f64,
+        }];
+        let result_expenses = pad_expense_names(&expenses, 2);
+        assert_eq!(true, result_expenses.is_err());
     }
 }
