@@ -126,16 +126,18 @@ fn print_expense_table(expenses: &Vec<Expense>) {
     // TODO use ? operator instead of unwrap()
     let padded_expenses = pad_expense_names(expenses, longest_name).unwrap();
 
-    print_header();
+    print_header(longest_name);
     for expense in padded_expenses {
         println!("| {} | {} |", expense.name, expense.amount);
     }
 }
 
-fn print_header() {
-    println!("+---------+----------+");
+fn print_header(longest: i32) {
+    let border = (0..longest + 2).map(|_| "-").collect::<String>();
+    println!("+{}+----------+", border);
+    // TODO pad if What is not longest
     println!("| What    | How much |");
-    println!("+---------+----------+");
+    println!("+{}+----------+", border);
 }
 
 fn find_longest_expense_name(expenses: &Vec<Expense>) -> i32 {
