@@ -5,6 +5,7 @@ use std::io::{BufRead, BufReader, Write};
 use std::process;
 
 const EXPENSE_NAME_HEADER: &str = "What";
+const EXPENSE_AMOUNT_HEADER: &str = "How much";
 
 type Result<T> = std::result::Result<T, ExpenseError>;
 
@@ -66,6 +67,11 @@ struct Expense {
     amount: f64,
 }
 
+struct PaddedExpense {
+    name: String,
+    amount: String,
+}
+
 impl fmt::Display for Expense {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(&self.name)?;
@@ -122,32 +128,46 @@ fn parse_expenses(file: &File) -> Vec<Expense> {
 
 fn print_expense_table(expenses: &Vec<Expense>) {
     let longest_name = find_longest_expense_name(expenses);
+    let longest_amount = find_longest_expense_amount(expenses);
 
     // TODO use ? operator instead of unwrap()
-    let padded_expenses = pad_expense_names(expenses, longest_name).unwrap();
+    let padded_expenses = pad_expenses(expenses, longest_name, longest_amount).unwrap();
 
-    print_header(longest_name);
+    print_header(longest_name, longest_amount);
     for expense in padded_expenses {
         println!("| {} | {} |", expense.name, expense.amount);
     }
+    print_footer(longest_name, longest_amount);
 }
 
-fn print_header(longest: i32) {
-    let border = (0..longest + 2).map(|_| "-").collect::<String>();
-    println!("+{}+----------+", border);
+fn print_header(longest_name: i32, longest_amount: i32) {
+    let name_border = (0..longest_name + 2).map(|_| "-").collect::<String>();
+    let amount_border = (0..longest_amount + 2).map(|_| "-").collect::<String>();
+    println!("+{}+{}+", name_border, amount_border);
 
-    if longest > EXPENSE_NAME_HEADER.len() as i32 {
-        let difference = longest - EXPENSE_NAME_HEADER.len() as i32;
-        let spaces = (0..difference).map(|_| " ").collect::<String>();
+    if longest_name > EXPENSE_NAME_HEADER.len() as i32
+        || longest_amount > EXPENSE_AMOUNT_HEADER.len() as i32
+    {
+        let name_difference = longest_name - EXPENSE_NAME_HEADER.len() as i32;
+        let name_spaces = (0..name_difference).map(|_| " ").collect::<String>();
+        let amount_difference = longest_amount - EXPENSE_AMOUNT_HEADER.len() as i32;
+        let amount_spaces = (0..amount_difference).map(|_| " ").collect::<String>();
         println!(
-            "| {} | How much |",
-            format!("{}{}", EXPENSE_NAME_HEADER, spaces).to_string()
+            "| {} | {} |",
+            format!("{}{}", EXPENSE_NAME_HEADER, name_spaces).to_string(),
+            format!("{}{}", EXPENSE_AMOUNT_HEADER, amount_spaces).to_string()
         );
     } else {
         println!("| What | How much |");
     }
 
-    println!("+{}+----------+", border);
+    println!("+{}+{}+", name_border, amount_border);
+}
+
+fn print_footer(longest_name: i32, longest_amount: i32) {
+    let name_border = (0..longest_name + 2).map(|_| "-").collect::<String>();
+    let amount_border = (0..longest_amount + 2).map(|_| "-").collect::<String>();
+    println!("+{}+{}+", name_border, amount_border);
 }
 
 fn find_longest_expense_name(expenses: &Vec<Expense>) -> i32 {
@@ -161,22 +181,44 @@ fn find_longest_expense_name(expenses: &Vec<Expense>) -> i32 {
     longest
 }
 
-fn pad_expense_names(expenses: &Vec<Expense>, longest: i32) -> Result<Vec<Expense>> {
+fn find_longest_expense_amount(expenses: &Vec<Expense>) -> i32 {
+    let mut longest = EXPENSE_AMOUNT_HEADER.len() as i32;
+    for expense in expenses {
+        let actual_length = expense.amount.to_string().len() as i32;
+        if actual_length > longest {
+            longest = actual_length;
+        }
+    }
+
+    longest
+}
+
+fn pad_expenses(
+    expenses: &Vec<Expense>,
+    longest_name: i32,
+    longest_amount: i32,
+) -> Result<Vec<PaddedExpense>> {
     let mut padded_expenses = Vec::new();
     for expense in expenses {
-        let actual_length = expense.name.len() as i32;
-        if actual_length == longest {
-            padded_expenses.push(expense.clone());
+        let actual_name_length = expense.name.len() as i32;
+        let actual_amount_length = expense.amount.to_string().len() as i32;
+        if actual_name_length == longest_name && actual_amount_length == longest_amount {
+            padded_expenses.push(PaddedExpense {
+                name: expense.name.to_string(),
+                amount: expense.amount.to_string(),
+            });
         } else {
-            let difference = longest - actual_length;
-            if difference < 0 {
+            let name_difference = longest_name - actual_name_length;
+            let amount_difference = longest_amount - actual_amount_length;
+            if name_difference < 0 || amount_difference < 0 {
                 let error: ExpenseError = ExpenseError::new("Padding went wrong!");
                 return Err(error);
             }
-            let spaces = (0..difference).map(|_| " ").collect::<String>();
-            padded_expenses.push(Expense {
-                name: format!("{}{}", expense.name, spaces).to_string(),
-                amount: expense.amount,
+            let name_spaces = (0..name_difference).map(|_| " ").collect::<String>();
+            let amount_spaces = (0..amount_difference).map(|_| " ").collect::<String>();
+            padded_expenses.push(PaddedExpense {
+                name: format!("{}{}", expense.name, name_spaces).to_string(),
+                amount: format!("{}{}", expense.amount.to_string(), amount_spaces).to_string(),
             });
         }
     }
@@ -239,7 +281,7 @@ mod tests {
             name: "foo".to_string(),
             amount: 0f64,
         }];
-        let result_expenses = pad_expense_names(&expenses, 4);
+        let result_expenses = pad_expenses(&expenses, 4, 8);
         assert_eq!(true, result_expenses.is_ok());
     }
 
@@ -249,7 +291,7 @@ mod tests {
             name: "foo".to_string(),
             amount: 0f64,
         }];
-        let result_expenses = pad_expense_names(&expenses, 2);
+        let result_expenses = pad_expenses(&expenses, 2, 3);
         assert_eq!(true, result_expenses.is_err());
     }
 }
