@@ -135,8 +135,18 @@ fn print_expense_table(expenses: &Vec<Expense>) {
 fn print_header(longest: i32) {
     let border = (0..longest + 2).map(|_| "-").collect::<String>();
     println!("+{}+----------+", border);
-    // TODO pad if What is not longest
-    println!("| What    | How much |");
+
+    if longest > EXPENSE_NAME_HEADER.len() as i32 {
+        let difference = longest - EXPENSE_NAME_HEADER.len() as i32;
+        let spaces = (0..difference).map(|_| " ").collect::<String>();
+        println!(
+            "| {} | How much |",
+            format!("{}{}", EXPENSE_NAME_HEADER, spaces).to_string()
+        );
+    } else {
+        println!("| What | How much |");
+    }
+
     println!("+{}+----------+", border);
 }
 
