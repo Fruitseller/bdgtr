@@ -126,7 +126,7 @@ fn parse_expenses(file: &File) -> Vec<Expense> {
     expenses
 }
 
-fn print_expense_table(expenses: &Vec<Expense>) {
+fn print_expense_table(expenses: &[Expense]) {
     let longest_name = find_longest_expense_name(expenses);
     let longest_amount = find_longest_expense_amount(expenses);
 
@@ -170,7 +170,7 @@ fn print_footer(longest_name: i32, longest_amount: i32) {
     println!("+{}+{}+", name_border, amount_border);
 }
 
-fn find_longest_expense_name(expenses: &Vec<Expense>) -> i32 {
+fn find_longest_expense_name(expenses: &[Expense]) -> i32 {
     let mut longest: i32 = EXPENSE_NAME_HEADER.len() as i32;
     for expense in expenses {
         let actual_length = expense.name.len() as i32;
@@ -181,7 +181,7 @@ fn find_longest_expense_name(expenses: &Vec<Expense>) -> i32 {
     longest
 }
 
-fn find_longest_expense_amount(expenses: &Vec<Expense>) -> i32 {
+fn find_longest_expense_amount(expenses: &[Expense]) -> i32 {
     let mut longest = EXPENSE_AMOUNT_HEADER.len() as i32;
     for expense in expenses {
         let actual_length = expense.amount.to_string().len() as i32;
@@ -194,7 +194,7 @@ fn find_longest_expense_amount(expenses: &Vec<Expense>) -> i32 {
 }
 
 fn pad_expenses(
-    expenses: &Vec<Expense>,
+    expenses: &[Expense],
     longest_name: i32,
     longest_amount: i32,
 ) -> Result<Vec<PaddedExpense>> {
