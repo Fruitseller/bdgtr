@@ -112,7 +112,7 @@ fn parse_expenses(file: &File) -> Vec<Expense> {
             Ok(l) => l,
             Err(_) => continue,
         };
-        let mut split_result: Vec<String> = line.split(",").map(|s| s.to_string()).collect();
+        let mut split_result: Vec<String> = line.split(',').map(|s| s.to_string()).collect();
 
         if split_result.len() == 2 {
             let parse_result = split_result.remove(1).parse::<f64>();
