@@ -54,7 +54,10 @@ fn main() {
                 let name = args[2].to_string();
                 let expense = Expense { name, amount };
                 let mut file = get_file_for_write("expenses.csv");
-                writeln!(file, "{}", expense.to_string());
+                match writeln!(file, "{}", expense.to_string()) {
+                    Ok(_) => "Successfully added expense",
+                    Err(e) => panic!(e),
+                };
             }
         }
         _ => panic!("Too many arguments!"),
