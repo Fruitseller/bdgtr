@@ -34,20 +34,17 @@ pub fn print_expense_table(expenses: &[Expense]) {
     let longest_name = find_longest_expense_name(expenses);
     let longest_amount = find_longest_expense_amount(expenses);
 
-    // TODO use ? operator instead of unwrap()
     let padded_expenses = pad_expenses(expenses, longest_name, longest_amount).unwrap();
 
     print_header(longest_name, longest_amount);
     for expense in padded_expenses {
         println!("| {} | {} |", expense.name, expense.amount);
     }
-    print_footer(longest_name, longest_amount);
+    print_spacer(longest_name, longest_amount);
 }
 
 fn print_header(longest_name: i32, longest_amount: i32) {
-    let name_border = (0..longest_name + 2).map(|_| "-").collect::<String>();
-    let amount_border = (0..longest_amount + 2).map(|_| "-").collect::<String>();
-    println!("+{}+{}+", name_border, amount_border);
+    print_spacer(longest_name, longest_amount);
 
     if longest_name > EXPENSE_NAME_HEADER.len() as i32
         || longest_amount > EXPENSE_AMOUNT_HEADER.len() as i32
@@ -62,13 +59,13 @@ fn print_header(longest_name: i32, longest_amount: i32) {
             format!("{}{}", EXPENSE_AMOUNT_HEADER, amount_spaces).to_string()
         );
     } else {
-        println!("| What | How much |");
+        println!("{}", format!("| {} | {} |", EXPENSE_NAME_HEADER, EXPENSE_AMOUNT_HEADER));
     }
 
-    println!("+{}+{}+", name_border, amount_border);
+    print_spacer(longest_name, longest_amount);
 }
 
-fn print_footer(longest_name: i32, longest_amount: i32) {
+fn print_spacer(longest_name: i32, longest_amount: i32) {
     let name_border = (0..longest_name + 2).map(|_| "-").collect::<String>();
     let amount_border = (0..longest_amount + 2).map(|_| "-").collect::<String>();
     println!("+{}+{}+", name_border, amount_border);
