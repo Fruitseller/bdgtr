@@ -8,6 +8,9 @@ mod render;
 use io::{get_file_for_read, get_file_for_write};
 mod io;
 
+const EXPENSES: &str = "expenses";
+const ADD: &str = "add";
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Expense {
     name: String,
@@ -31,7 +34,7 @@ fn main() {
             println!("I am groot");
         }
         2 => {
-            if args[1] != "expenses" {
+            if args[1].ne(EXPENSES) {
                 println!("Wrong argument");
             } else {
                 match get_file_for_read("expenses.csv") {
@@ -47,7 +50,7 @@ fn main() {
             }
         }
         4 => {
-            if args[1] == "add" {
+            if args[1].eq(ADD) {
                 let result = args[3].parse::<f64>();
                 let amount = match result {
                     Ok(amount) => amount,
