@@ -1,5 +1,5 @@
-use std::fmt;
 use super::Expense;
+use std::fmt;
 
 const EXPENSE_NAME_HEADER: &str = "What";
 const EXPENSE_AMOUNT_HEADER: &str = "How much";
@@ -59,7 +59,10 @@ fn print_header(longest_name: i32, longest_amount: i32) {
             format!("{}{}", EXPENSE_AMOUNT_HEADER, amount_spaces).to_string()
         );
     } else {
-        println!("{}", format!("| {} | {} |", EXPENSE_NAME_HEADER, EXPENSE_AMOUNT_HEADER));
+        println!(
+            "{}",
+            format!("| {} | {} |", EXPENSE_NAME_HEADER, EXPENSE_AMOUNT_HEADER)
+        );
     }
 
     print_spacer(longest_name, longest_amount);

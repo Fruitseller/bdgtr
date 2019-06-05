@@ -146,5 +146,4 @@ mod tests {
         assert_eq!(expected_expenses, actual_expenses);
     }
 
-
 }
