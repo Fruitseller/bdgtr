@@ -3,6 +3,7 @@ use std::fmt;
 
 const EXPENSE_NAME_HEADER: &str = "What";
 const EXPENSE_AMOUNT_HEADER: &str = "How much";
+const EXPENSE_SUMMARY: &str = "Summary";
 
 struct PaddedExpense {
     name: String,
@@ -72,6 +73,14 @@ fn print_spacer(longest_name: i32, longest_amount: i32) {
     let name_border = (0..longest_name + 2).map(|_| "-").collect::<String>();
     let amount_border = (0..longest_amount + 2).map(|_| "-").collect::<String>();
     println!("+{}+{}+", name_border, amount_border);
+}
+
+pub fn print_expense_summary(expenses: &[Expense]) {
+    let mut sum: f64 = 0.0;
+    for expense in expenses {
+        sum += expense.amount;
+    }
+    println!(" {}: {} €", EXPENSE_SUMMARY, sum.to_string());
 }
 
 fn find_longest_expense_name(expenses: &[Expense]) -> i32 {

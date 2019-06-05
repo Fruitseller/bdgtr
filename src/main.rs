@@ -1,4 +1,4 @@
-use render::print_expense_table;
+use render::{print_expense_summary, print_expense_table};
 use std::env;
 use std::fmt;
 use std::fs::File;
@@ -41,6 +41,7 @@ fn main() {
                     Ok(file) => {
                         let expenses = parse_expenses(&file);
                         print_expense_table(&expenses);
+                        print_expense_summary(&expenses);
                     }
                     Err(e) => {
                         eprintln!("Could not read file: {:#?}", e);
